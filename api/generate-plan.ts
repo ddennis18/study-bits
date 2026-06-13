@@ -61,11 +61,11 @@ export default async function handler(req: Request, res: Response) {
     console.log(`[${requestId}] [INFO] Initialized GoogleGenAI client with model: "${model}". Sending study bits plan instructions...`);
 
     const systemPrompt = `You are StudyBits, an elite educational system that breaks down massive, complex, or tedious study materials into digestible, hyper-focused daily "bits" to combat last-minute cramming.
-Your goal is to parse the input material and distill it into exactly \${durationDays} daily bits.
-Each bit must fit sequentially from Day 1 to Day \${durationDays}.
-Each bit should correspond to roughly \${minutesPerDay} minutes of daily study time.
+Your goal is to parse the input material and distill it into exactly ${durationDays} daily bits.
+Each bit must fit sequentially from Day 1 to Day ${durationDays}.
+Each bit should correspond to roughly ${minutesPerDay} minutes of daily study time.
 Each bit must have:
-- dayNumber (integer from 1 to \${durationDays})
+- dayNumber (integer from 1 to ${durationDays})
 - title (catchy, concise lesson name, e.g. "Understand the Syntax" or "The Mitochondria Membrane")
 - summary (a complete draft of the lesson contents. Write this in a readable, highly educational prose. Do not make it a simple list of outline items. Include detailed definitions, brief context, clear explanations, and formatting with markdown for headers and lists so that the user can literally learn the material by just reading this.)
 - keyTakeaways (exactly 3 memorable high-value bullets of 1-sentence each)
@@ -74,20 +74,20 @@ Each bit must have:
   - Each quiz question must have exactly 4 choices
   - Each quiz question must have a correctAnswerIndex (0, 1, 2, or 3) targetting the correct element.`;
 
-    const userPrompt = `Subject requested: \${subject || "General Study"}
-Course target title: \${projectTitle || "Study Material Breakdown"}
-Total Days requested: \${durationDays}
-Minutes available per day: \${minutesPerDay} minutes
+    const userPrompt = `Subject requested: ${subject || "General Study"}
+Course target title: ${projectTitle || "Study Material Breakdown"}
+Total Days requested: ${durationDays}
+Minutes available per day: ${minutesPerDay} minutes
 
 Here is the study material text to parse and split:
 -----
-\${content.substring(0, 150000)}
+${content.substring(0, 150000)}
 -----
 
 Please generate the study plan now. Return valid cohesive structured JSON matching the requested schema.`;
 
     const startTime = Date.now();
-    console.log(`[\${requestId}] [INFO] Invoking Gemini API generateContent call...`);
+    console.log(`[${requestId}] [INFO] Invoking Gemini API generateContent call...`);
     
     let response;
     try {
@@ -146,37 +146,37 @@ Please generate the study plan now. Return valid cohesive structured JSON matchi
         }
       });
     } catch (apiErr: any) {
-      console.error(`[\${requestId}] [API_ERROR] Gemini model generateContent SDK call failed:`, apiErr);
+      console.error(`[${requestId}] [API_ERROR] Gemini model generateContent SDK call failed:`, apiErr);
       throw apiErr;
     }
 
     const duration = Date.now() - startTime;
-    console.log(`[\${requestId}] [INFO] Gemini API responded successfully in \${duration}ms.`);
+    console.log(`[${requestId}] [INFO] Gemini API responded successfully in ${duration}ms.`);
 
     const outputText = response.text;
     if (!outputText) {
-      console.error(`[\${requestId}] [ERROR] Gemini API returned an empty output string.`);
+      console.error(`[${requestId}] [ERROR] Gemini API returned an empty output string.`);
       throw new Error("Empty response returned from Gemini.");
     }
 
-    console.log(`[\${requestId}] [INFO] Gemini raw response text length: \${outputText.length} characters.`);
+    console.log(`[${requestId}] [INFO] Gemini raw response text length: ${outputText.length} characters.`);
 
     let parsedData;
     try {
       parsedData = JSON.parse(outputText.trim());
-      console.log(`[\${requestId}] [INFO] Valid JSON successfully parsed. Title: "\${parsedData.planTitle}", portions count: \${parsedData.bits ? parsedData.bits.length : 0}.`);
+      console.log(`[${requestId}] [INFO] Valid JSON successfully parsed. Title: "${parsedData.planTitle}", portions count: ${parsedData.bits ? parsedData.bits.length : 0}.`);
     } catch (parseErr: any) {
-      console.error(`[\${requestId}] [PARSE_ERROR] Failed to parse outputText as structured JSON.`, parseErr);
-      console.error(`[\${requestId}] [PARSE_ERROR] FIRST 1500 CHARACTERS OF THE FAILED RESPONSE:`);
+      console.error(`[${requestId}] [PARSE_ERROR] Failed to parse outputText as structured JSON.`, parseErr);
+      console.error(`[${requestId}] [PARSE_ERROR] FIRST 1500 CHARACTERS OF THE FAILED RESPONSE:`);
       console.error("--------------------------------------------------");
       console.error(outputText.substring(0, 1500));
       console.error("--------------------------------------------------");
-      throw new Error(`The AI output was not valid JSON: \${parseErr.message || parseErr}`);
+      throw new Error(`The AI output was not valid JSON: ${parseErr.message || parseErr}`);
     }
 
     res.json(parsedData);
   } catch (error: any) {
-    console.error(`[\${requestId}] [FATAL_ERROR] Exception caught in generate-plan route handler:`, error);
+    console.error(`[${requestId}] [FATAL_ERROR] Exception caught in generate-plan route handler:`, error);
     res.status(500).json({ 
       error: error.message || "An unexpected error occurred during study plan compilation.",
       requestId: requestId,
