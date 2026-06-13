@@ -135,25 +135,34 @@ export default function App() {
     savePlans(updatedPlans);
 
     // Calculate/Maintain user streak days
-    const todayStr = new Date().toISOString().split("T")[0];
+    const getLocalTodayStr = () => {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const r = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${r}`;
+    };
+    const todayStr = getLocalTodayStr();
     let newStreak = user.streakDays;
-    let keepStreak = false;
 
     if (user.lastStudiedDate) {
-      if (user.lastStudiedDate === todayStr) {
-        // Already incremented streak today, keep flat
-        keepStreak = true;
-      } else {
-        const lastDate = new Date(user.lastStudiedDate);
-        const todayDate = new Date(todayStr);
-        const diffTime = Math.abs(todayDate.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (user.lastStudiedDate !== todayStr) {
+        const lastDateParts = user.lastStudiedDate.split("-");
+        const todayDateParts = todayStr.split("-");
+        if (lastDateParts.length === 3 && todayDateParts.length === 3) {
+          const lastDate = new Date(parseInt(lastDateParts[0], 10), parseInt(lastDateParts[1], 10) - 1, parseInt(lastDateParts[2], 10));
+          const todayDate = new Date(parseInt(todayDateParts[0], 10), parseInt(todayDateParts[1], 10) - 1, parseInt(todayDateParts[2], 10));
+          const diffTime = Math.abs(todayDate.getTime() - lastDate.getTime());
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays <= 1.5) {
-          // kept alive yesterday
-          newStreak += 1;
+          if (diffDays <= 1) {
+            // kept alive yesterday
+            newStreak += 1;
+          } else {
+            // expired
+            newStreak = 1;
+          }
         } else {
-          // expired
           newStreak = 1;
         }
       }

@@ -12,6 +12,13 @@ interface UploadProps {
   onGoBack: () => void;
 }
 
+const formatLocalYYYYMMDD = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
   const [projectTitle, setProjectTitle] = useState("");
   const [subject, setSubject] = useState("Biology");
@@ -31,7 +38,7 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
     // Default deadline to 10 days from now
     const d = new Date();
     d.setDate(d.getDate() + 10);
-    return d.toISOString().split("T")[0];
+    return formatLocalYYYYMMDD(d);
   });
   const [minutesPerDay, setMinutesPerDay] = useState(30);
   
@@ -43,14 +50,22 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getDaysCount = (): number => {
+    if (!deadlineDate) return 0;
+    const parts = deadlineDate.split("-");
+    if (parts.length !== 3) return 0;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+
+    const target = new Date(year, month, day, 0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(deadlineDate);
-    target.setHours(0, 0, 0, 0);
     
     const diffTime = target.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    if (isNaN(diffTime)) return 0;
+
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -465,7 +480,7 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
                   id="deadline_picker"
                   type="date"
                   value={deadlineDate}
-                  min={new Date(Date.now() + 172800000).toISOString().split("T")[0]} // min 2 days
+                  min={formatLocalYYYYMMDD(new Date(Date.now() + 172800000))} // min 2 days
                   onChange={(e) => setDeadlineDate(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-[#12100f] border border-stone-800 focus:border-stone-600 rounded-xl text-xs focus:outline-none focus:bg-[#1c1917] text-stone-100 font-medium"
                 />
