@@ -46,6 +46,7 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
   const [generating, setGenerating] = useState(false);
   const [genStep, setGenStep] = useState(0);
   const [error, setError] = useState("");
+  const [errorReqId, setErrorReqId] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -152,6 +153,7 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
 
   const handleGenerate = async () => {
     setError("");
+    setErrorReqId("");
     const textToProcess = activeTab === "pdf" ? pdfText : pastedText;
     const finalTitle = projectTitle.trim() || `${subject} Master Plan`;
     const days = getDaysCount();
@@ -192,11 +194,19 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
         }),
       });
 
-      const data = await response.json();
+      let data: any = {};
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        console.warn("[CLIENT] Response body is not valid JSON", jsonErr);
+      }
+
       clearInterval(stepTimer);
 
       if (!response.ok) {
-        throw new Error(data.error || "Server failed to compile plan. Please try again.");
+        const customErr = new Error(data.error || "Server failed to compile plan. Please try again.");
+        (customErr as any).requestId = data.requestId;
+        throw customErr;
       }
 
       // Turn output into high-fidelity local state
@@ -219,9 +229,14 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
 
       onPlanCreated(newPlan);
     } catch (err: any) {
-      console.error(err);
+      console.error("[CLIENT_ERROR] Failed during Study Plan generation:", err);
       clearInterval(stepTimer);
       setError(err.message || "An error occurred with Gemini during text organization. Please try again.");
+      if (err.requestId) {
+        setErrorReqId(err.requestId);
+      } else {
+        setErrorReqId("");
+      }
     } finally {
       setGenerating(false);
     }
@@ -305,7 +320,16 @@ export default function Upload({ onPlanCreated, onGoBack }: UploadProps) {
       {error && (
         <div className="bg-red-950/20 border border-red-900/50 text-red-400 p-4 rounded-2xl text-xs font-medium flex items-start gap-2.5 mb-6">
           <AlertCircle className="h-4.5 w-4.5 text-red-500 shrink-0 stroke-[1.8]" />
-          <div>{error}</div>
+          <div className="flex-1">
+            <div className="font-semibold text-red-350">Plan Compilation Failed</div>
+            <div className="mt-1 leading-relaxed text-stone-300">{error}</div>
+            {errorReqId && (
+              <div className="mt-3 pt-2.5 border-t border-red-900/40 text-[10px] text-stone-400 font-mono tracking-wide">
+                <div>Vercel Log Trace Request ID: <strong className="text-red-300 font-bold bg-red-950/40 px-1 py-0.5 rounded select-all font-mono">{errorReqId}</strong></div>
+                <div className="mt-1 text-stone-500">Copy this ID and search your Vercel Function logs to see the precise reason Gemini failed.</div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

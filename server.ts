@@ -30,23 +30,37 @@ function getGeminiClient(): { ai: GoogleGenAI; model: string } | null {
 
 // REST API for study plan generation using Gemini 1.5/3.5 Flash
 app.post("/api/generate-plan", async (req: Request, res: Response) => {
+  const requestId = `req_${Date.now()}`;
+  console.log(`[${requestId}] [INFO] POST /api/generate-plan initiated.`);
   try {
     const { content, durationDays, minutesPerDay, subject, projectTitle } = req.body;
 
+    console.log(`[${requestId}] [INFO] Parameters - Title: "${projectTitle || "N/A"}", Subject: "${subject || "N/A"}", Days: ${durationDays}, Mins/Day: ${minutesPerDay}`);
+    console.log(`[${requestId}] [INFO] Input material length: ${content ? content.length : 0} characters.`);
+
     if (!content || !durationDays || !minutesPerDay) {
-      res.status(400).json({ error: "Missing required parameters: content, durationDays, and minutesPerDay are required." });
+      const errMsg = "Missing required parameters: content, durationDays, and minutesPerDay are required.";
+      console.warn(`[${requestId}] [WARN] Bad request: ${errMsg}`);
+      res.status(400).json({ error: errMsg });
       return;
     }
 
+    const hasKey = !!process.env.GEMINI_API_KEY;
+    const keyPrefix = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 6) : "none";
+    console.log(`[${requestId}] [INFO] Checking GEMINI_API_KEY status. Configured: ${hasKey}. Key prefix: "${keyPrefix}..."`);
+
     const gemini = getGeminiClient();
     if (!gemini) {
+      const errMsg = "Gemini API key is not configured. Please supply your API key in the Secrets / Environment variable settings to activate StudyBits core generation.";
+      console.error(`[${requestId}] [ERROR] ${errMsg}`);
       res.status(400).json({
-        error: "Gemini API key is not configured. Please supply your API key in the Secrets / Environment variable settings to activate StudyBits core generation."
+        error: errMsg
       });
       return;
     }
 
     const { ai, model } = gemini;
+    console.log(`[${requestId}] [INFO] Initialized GoogleGenAI client with model: "${model}". Sending study bits plan instructions...`);
 
     const systemPrompt = `You are StudyBits, an elite educational system that breaks down massive, complex, or tedious study materials into digestible, hyper-focused daily "bits" to combat last-minute cramming.
 Your goal is to parse the input material and distill it into exactly ${durationDays} daily bits.
@@ -74,71 +88,102 @@ ${content.substring(0, 150000)}
 
 Please generate the study plan now. Return valid cohesive structured JSON matching the requested schema.`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: userPrompt,
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            planTitle: {
-              type: Type.STRING,
-              description: "A gorgeous, descriptive title for the overall master plan (e.g. 'Intro to Biology: Cellular Machinery' or 'React Hooks Demystified')."
-            },
-            bits: {
-              type: Type.ARRAY,
-              description: "The complete list of daily study modules. Must be exactly N sequential days from 1 to N.",
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  dayNumber: { type: Type.INTEGER },
-                  title: { type: Type.STRING },
-                  summary: { type: Type.STRING, description: "Rich, comprehensive, and clear educational content explaining the concepts for today. Use Markdown where helpful." },
-                  keyTakeaways: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Exactly 3 main actionable key takeaway lines."
-                  },
-                  readingTimeMin: { type: Type.INTEGER, description: "Estimated study time needed to fully digest today's bit." },
-                  quiz: {
-                    type: Type.ARRAY,
-                    description: "Exactly 3 distinct, multiple-choice testing questions",
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        question: { type: Type.STRING },
-                        options: {
-                          type: Type.ARRAY,
-                          items: { type: Type.STRING },
-                          description: "Exactly 4 options"
+    const startTime = Date.now();
+    console.log(`[${requestId}] [INFO] Invoking Gemini API generateContent call...`);
+    
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: model,
+        contents: userPrompt,
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              planTitle: {
+                type: Type.STRING,
+                description: "A gorgeous, descriptive title for the overall master plan (e.g. 'Intro to Biology: Cellular Machinery' or 'React Hooks Demystified')."
+              },
+              bits: {
+                type: Type.ARRAY,
+                description: "The complete list of daily study modules. Must be exactly N sequential days from 1 to N.",
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    dayNumber: { type: Type.INTEGER },
+                    title: { type: Type.STRING },
+                    summary: { type: Type.STRING, description: "Rich, comprehensive, and clear educational content explaining the concepts for today. Use Markdown where helpful." },
+                    keyTakeaways: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING },
+                      description: "Exactly 3 main actionable key takeaway lines."
+                    },
+                    readingTimeMin: { type: Type.INTEGER, description: "Estimated study time needed to fully digest today's bit." },
+                    quiz: {
+                      type: Type.ARRAY,
+                      description: "Exactly 3 distinct, multiple-choice testing questions",
+                      items: {
+                        type: Type.OBJECT,
+                        properties: {
+                          question: { type: Type.STRING },
+                          options: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: "Exactly 4 options"
+                          },
+                          correctAnswerIndex: { type: Type.INTEGER, description: "Correct index from 0 to 3." }
                         },
-                        correctAnswerIndex: { type: Type.INTEGER, description: "Correct index from 0 to 3." }
-                      },
-                      required: ["question", "options", "correctAnswerIndex"]
+                        required: ["question", "options", "correctAnswerIndex"]
+                      }
                     }
-                  }
-                },
-                required: ["dayNumber", "title", "summary", "keyTakeaways", "readingTimeMin", "quiz"]
+                  },
+                  required: ["dayNumber", "title", "summary", "keyTakeaways", "readingTimeMin", "quiz"]
+                }
               }
-            }
-          },
-          required: ["planTitle", "bits"]
+            },
+            required: ["planTitle", "bits"]
+          }
         }
-      }
-    });
+      });
+    } catch (apiErr: any) {
+      console.error(`[${requestId}] [API_ERROR] Gemini model generateContent SDK call failed:`, apiErr);
+      throw apiErr;
+    }
+
+    const duration = Date.now() - startTime;
+    console.log(`[${requestId}] [INFO] Gemini API responded successfully in ${duration}ms.`);
 
     const outputText = response.text;
     if (!outputText) {
+      console.error(`[${requestId}] [ERROR] Gemini API returned an empty output string.`);
       throw new Error("Empty response returned from Gemini.");
     }
 
-    const parsedData = JSON.parse(outputText.trim());
+    console.log(`[${requestId}] [INFO] Gemini raw response text length: ${outputText.length} characters.`);
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(outputText.trim());
+      console.log(`[${requestId}] [INFO] Valid JSON successfully parsed. Title: "${parsedData.planTitle}", portions count: ${parsedData.bits ? parsedData.bits.length : 0}.`);
+    } catch (parseErr: any) {
+      console.error(`[${requestId}] [PARSE_ERROR] Failed to parse outputText as structured JSON.`, parseErr);
+      console.error(`[${requestId}] [PARSE_ERROR] FIRST 1500 CHARACTERS OF THE FAILED RESPONSE:`);
+      console.error("--------------------------------------------------");
+      console.error(outputText.substring(0, 1500));
+      console.error("--------------------------------------------------");
+      throw new Error(`The AI output was not valid JSON: ${parseErr.message || parseErr}`);
+    }
+
     res.json(parsedData);
   } catch (error: any) {
-    console.error("Plan Generation Error:", error);
-    res.status(500).json({ error: error.message || "An unexpected error occurred during study plan compilation." });
+    console.error(`[${requestId}] [FATAL_ERROR] Exception caught in generate-plan route handler:`, error);
+    res.status(500).json({ 
+      error: error.message || "An unexpected error occurred during study plan compilation.",
+      requestId: requestId,
+      stack: process.env.NODE_ENV !== "production" ? error.stack : undefined
+    });
   }
 });
 
