@@ -1,0 +1,6 @@
+{
+  "name": "StudyBits",
+  "description": "Kills last-minute cramming by breaking your study material into sequenced daily bits optimized for your available time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
