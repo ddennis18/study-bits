@@ -23,6 +23,7 @@ export default function App() {
     }
   }, []);
 
+
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
@@ -53,7 +54,7 @@ export default function App() {
   const handleLoginSuccess = (profile: UserProfile) => {
     localStorage.setItem("studybits_user_profile", JSON.stringify(profile));
     setUser(profile);
-    
+
     // Load existing plans for this email
     const storedPlans = localStorage.getItem(`studybits_plans_${profile.email}`);
     if (storedPlans) {
@@ -184,12 +185,11 @@ export default function App() {
   const activePlan = plans.find((p) => p.id === selectedPlanId);
 
   return (
-    <div id="study_bits_app" className={`min-h-screen flex flex-col font-sans selection:bg-stone-800 transition-colors duration-200 ${
-      theme === "dark" 
-        ? "bg-[#0c0a09] text-stone-100 theme-dark" 
+    <div id="study_bits_app" className={`min-h-screen flex flex-col font-sans selection:bg-stone-800 transition-colors duration-200 ${theme === "dark"
+        ? "bg-[#0c0a09] text-stone-100 theme-dark"
         : "bg-[#faf8f5] text-stone-900 theme-light"
-    }`}>
-      
+      }`}>
+
       {/* Floating Theme Toggle when logged out */}
       {!user && (
         <div className="fixed top-4 right-4 z-50">
@@ -210,49 +210,66 @@ export default function App() {
 
       {/* Universal header bar for logged-in sessions */}
       {user && (
-        <header className="bg-[#171514] border-b border-stone-850 py-3.5 px-6 shadow-sm shrink-0">
+        <header className="bg-stone-950/80 backdrop-blur-md border-b border-stone-800/80 py-3 px-6 shadow-sm shrink-0 sticky top-0 z-50">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <div 
+
+            {/* Brand Logo & Title */}
+            <div
               onClick={() => setView("dashboard")}
-              className="flex items-center gap-2 cursor-pointer group"
+              className="flex items-center gap-3 cursor-pointer group"
             >
-              <div className="h-8 w-8 bg-stone-100 text-[#0c0a09] rounded-lg flex items-center justify-center shadow-sm">
-                <GraduationCap className="h-4.5 w-4.5 stroke-[1.8]" />
+              <div className="h-8 w-8 bg-stone-100 hover:bg-white text-[#0c0a09] rounded-xl flex items-center justify-center shadow-md transition-all group-hover:scale-105">
+                <GraduationCap className="h-4.5 w-4.5 stroke-[2]" />
               </div>
-              <span className="text-sm font-semibold tracking-tight text-stone-100 group-hover:text-stone-300 transition-colors">
+              <span className="text-base font-bold tracking-tight text-white group-hover:text-stone-300 transition-colors">
                 StudyBits
               </span>
             </div>
 
+            {/* Right Actions Area */}
             <div className="flex items-center gap-4">
+
               {/* Theme Toggle Button */}
               <button
                 id="header_theme_toggle_btn"
                 onClick={toggleTheme}
                 title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-                className="p-1.5 rounded-lg border border-stone-800 bg-[#12100f] hover:bg-stone-850 text-stone-300 hover:text-stone-100 transition-colors cursor-pointer flex items-center justify-center"
+                className="p-2 rounded-xl border border-stone-800/80 bg-stone-900/40 hover:bg-stone-800 text-stone-300 hover:text-stone-100 transition-all cursor-pointer flex items-center justify-center hover:scale-105 active:scale-95"
               >
                 {theme === "dark" ? (
                   <Sun className="h-4 w-4 text-amber-400 stroke-[1.8]" />
                 ) : (
-                  <Moon className="h-4 w-4 text-purple-400 stroke-[1.8]" />
+                  <Moon className="h-4 w-4 text-indigo-400 stroke-[1.8]" />
                 )}
               </button>
 
-              <div className="hidden sm:flex items-center gap-3 border-r border-stone-800 pr-4">
+              {/* User Profile display */}
+              <div className="hidden sm:flex items-center gap-3 border-r border-stone-800/80 pr-4 select-none">
                 <div className="text-right">
-                  <span className="text-[10px] text-stone-500 block font-mono">ONBOARDED PROFILE</span>
-                  <span className="text-xs font-semibold text-stone-200">{user.name}</span>
+                  <span className="block text-[9px] font-bold text-stone-500 tracking-widest uppercase">
+                    Profile
+                  </span>
+                  <span className="block text-xs font-bold text-stone-200 mt-0.5">
+                    {user.name}
+                  </span>
+                </div>
+                {/* Subtle Initial-based Avatar for polished look */}
+                <div className="h-7 w-7 rounded-lg bg-stone-800 flex items-center justify-center border border-stone-700/50">
+                  <span className="text-xs font-mono font-bold text-stone-300 uppercase">
+                    {user.name.charAt(0)}
+                  </span>
                 </div>
               </div>
 
+              {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="text-stone-400 hover:text-stone-200 transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+                className="text-stone-400 hover:text-red-400 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold py-1.5 px-3 rounded-xl hover:bg-red-950/10"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-3.5 w-3.5 stroke-[2]" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
+
             </div>
           </div>
         </header>
@@ -334,4 +351,3 @@ export default function App() {
     </div>
   );
 }
-

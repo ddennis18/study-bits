@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-@theme {
+/* Use :root for custom properties; @theme is not a standard at-rule */
+:root {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
@@ -11,11 +12,11 @@
   display: none;
 }
 .scrollbar-none {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
 }
 
-/* Markdown dark body styles */
+/* Markdown dark body styles (Defaults to Dark Mode) */
 .markdown-body h1, .markdown-body h2, .markdown-body h3 {
   font-family: var(--font-sans);
   color: #f5f5f4; /* stone-100 */
@@ -53,13 +54,50 @@
 
 
 /* ==========================================================================
-   LIGHT THEME PARADIGM OVERRIDES
+   LIGHT THEME PARADIGM OVERRIDES (MAPS TO OUR NEW TAILWIND STYLES)
    ========================================================================== */
 
 /* Outer container override */
 .theme-light {
-  background-color: #f8f7f4 !important; /* warm linen background */
+  background-color: #faf8f5 !important; /* Linen background */
   color: #1c1917 !important; /* stone-900 */
+}
+
+.theme-light #auth_container .text-white {
+  color: #1c1917 !important; 
+}
+
+.theme-light #auth_container .bg-stone-850 {
+  background-color: #ffffff !important;
+  border: 1px solid #d6d3d1 !important; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important; 
+}
+
+/* 2. Active Tab Text Color (Forces text color to crisp dark charcoal) */
+.theme-light #auth_container .bg-stone-850,
+.theme-light #auth_container .bg-stone-850.text-white {
+  color: #1c1917 !important; 
+}
+
+.theme-light #auth_container .bg-stone-900\/90 {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e1dc !important;
+}
+
+.theme-light #auth_demo_btn {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+.theme-light #auth_demo_btn:hover {
+  background-color: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+  color: #065f46 !important;
+}
+
+.theme-light #auth_demo_btn .text-emerald-400 {
+  color: #047857 !important;
 }
 
 /* Core application root bg overrides in light theme */
@@ -68,57 +106,109 @@
 .theme-light #dashboard_page,
 .theme-light #upload_container,
 .theme-light #bit_view_container {
-  background-color: #f8f7f4 !important;
+  background-color: #faf8f5 !important;
 }
+/* .theme-light #dashboard_page {
+  background-color: #faf8f5 !important;
+  color: #1c1917 !important;
+} */
 
-/* Card backgrounds targeting the arbitrary container Hex values */
-.theme-light .bg-\[\#171514\] {
+.theme-light .bg-stone-900\/10,
+.theme-light .bg-stone-900\/30 {
   background-color: #ffffff !important;
-  border-color: #e7e5e4 !important; /* stone-200 */
-  box-shadow: 0 4px 20px rgba(28, 25, 23, 0.03), 0 1px 3px rgba(28, 25, 23, 0.02) !important;
+  border-color: rgba(12, 10, 9, 0.08) !important;
+  box-shadow: 0 4px 25px rgba(28, 25, 23, 0.02), 0 1px 3px rgba(28, 25, 23, 0.01) !important;
 }
 
-/* Inner sub-cards and panels */
-.theme-light .bg-\[\#12100f\],
-.theme-light .bg-\[\#23201e\],
 .theme-light .bg-stone-950\/20,
-.theme-light .bg-stone-900,
-.theme-light .bg-[#1f1c1a],
-.theme-light .bg-\[\#1f1c1a\],
-.theme-light .bg-amber-955\/20,
-.theme-light .bg-emerald-950\/20 {
+.theme-light .bg-stone-950\/40,
+.theme-light .bg-stone-950\/50,
+.theme-light .bg-stone-900 {
   background-color: #f4f3f0 !important;
-  border-color: #e7e5e4 !important;
+  border-color: rgba(12, 10, 9, 0.08) !important;
 }
 
-.theme-light .p-4.bg-\[\#12100f\] {
-  background-color: #fbfaf8 !important;
-}
-
-/* Inactive timeline nodes hover overrides */
-.theme-light .bg-\[\#12100f\].border-stone-800:hover {
-  background-color: #ebeae6 !important;
-  border-color: #78716c !important;
-}
-
-/* Option Hover/Selected Overrides inside Quiz Panel */
-.theme-light .hover\:bg-stone-100:hover {
+.theme-light .bg-stone-105,
+.theme-light .bg-stone-100 {
   background-color: #e7e5e4 !important;
   color: #1c1917 !important;
 }
-.theme-light .border-stone-100 {
+
+.theme-light .bg-amber-950\/40 {
+  background-color: #fffbeb !important;
+  border-color: #fef08a !important;
+}
+
+.theme-light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+.theme-light .border-white\/5,
+.theme-light .border-white\/10,
+.theme-light .border-white\/20,
+.theme-light .border-white\/80 {
+  border-color: rgba(12, 10, 9, 0.08) !important;
+}
+
+.theme-light .border-b-white\/5,
+.theme-light .border-b-white\/10 {
+  border-bottom-color: rgba(12, 10, 9, 0.08) !important;
+}
+
+/* Timeline center connecting lines */
+.theme-light .bg-stone-950 {
+  background-color: #f4f3f0 !important;
+}
+
+/* Active Day focus node indicator background */
+.theme-light .bg-stone-850 {
+  background-color: #1c1917 !important;
+  color: #ffffff !important;
+}
+
+.theme-light .border-stone-800\/80 {
+  border-color: #e2e1dc !important;
+}
+
+/* 1. Active Tab Text and Bottom Border (Overrides invisible white active states) */
+.theme-light .text-white.border-white {
+  color: #1c1917 !important;
   border-color: #1c1917 !important;
 }
 
-/* Plan selector headers / Active tabs toggler */
-.theme-light #course_tabs_container {
-  background-color: #f4f3f0 !important;
-  border-color: #e7e5e4 !important;
+/* 2. File Name Header Text (Overrides invisible text-white file name) */
+.theme-light .text-white.tracking-tight {
+  color: #1c1917 !important;
 }
+
+/* 3. Upload Icon Box Background */
+.theme-light .bg-stone-900.border-stone-800\/80 {
+  background-color: #f4f3f0 !important;
+  border-color: #e2e1dc !important;
+}
+
+/* 1. Pace Minutes Numeric Display */
+.theme-light .text-white.font-mono {
+  color: #1c1917 !important;
+}
+
+/* 2. Slider Track Background */
+.theme-light #minutes_slider.bg-stone-950 {
+  background-color: #e2e1dc !important;
+}
+
+/* 3. Generation Button Disabled State */
+.theme-light #generator_trigger_btn:disabled {
+  background-color: #ebeae6 !important;
+  color: #a8a29e !important;
+  border-color: #e2e1dc !important;
+}
+
+/* 4. Plan selector active headers / Active tabs toggler */
 .theme-light .course-tab-active {
   background-color: #ffffff !important;
   color: #1c1917 !important;
-  border: 1px solid #d6d3d1 !important;
+  border-color: #d6d3d1 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 .theme-light .course-tab-inactive {
@@ -129,41 +219,19 @@
   color: #1c1917 !important;
   background-color: #ebeae6 !important;
 }
-.theme-light .bg-\[\#332f2c\] {
-  background-color: #ffffff !important;
+
+/* Option Hover/Selected Overrides inside Quiz Panel */
+.theme-light .hover\:bg-stone-100:hover,
+.theme-light .hover\:bg-white\/5:hover,
+.theme-light .hover\:bg-stone-850:hover {
+  background-color: #e7e5e4 !important;
   color: #1c1917 !important;
-  border: 1px solid #d6d3d1 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+.theme-light .border-stone-100 {
+  border-color: #1c1917 !important;
 }
 
-/* Fix connection and timeline separator lines in light theme */
-.theme-light .bg-stone-800 {
-  background-color: #e2e1dc !important;
-}
-
-/* Secondary outline buttons (like Cancel, Sign Out, Back) */
-.theme-light .border-stone-800,
-.theme-light .border-stone-850 {
-  border-color: #e2e1dc !important;
-}
-.theme-light .hover\:bg-stone-900:hover {
-  background-color: #ebeae6 !important;
-  color: #100f0e !important;
-}
-
-/* Auth demo button outline and background mappings in light mode */
-.theme-light .bg-emerald-950\/40 {
-  background-color: #ecfdf5 !important;
-  border-color: #a7f3d0 !important;
-  color: #047857 !important;
-}
-.theme-light .hover\:bg-emerald-950\/60:hover {
-  background-color: #d1fae5 !important;
-  border-color: #6ee7b7 !important;
-  color: #065f46 !important;
-}
-
-/* Input fields */
+/* Input fields, select dropdowns & textareas */
 .theme-light input,
 .theme-light textarea,
 .theme-light select {
@@ -177,44 +245,46 @@
   border-color: #78716c !important;
   background-color: #ffffff !important;
 }
-.theme-light input::placeholder {
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
   color: #a8a29e !important;
 }
 
-/* Text color adaptations */
+/* Primary heading text colors */
 .theme-light .text-stone-100,
-.theme-light .text-stone-101,
+.theme-light .text-stone-105,
 .theme-light .text-stone-200,
 .theme-light .text-stone-300 {
-  color: #100f0e !important; /* high contrast crisp heading */
+  color: #1c1917 !important; /* crisp charcoal heading */
 }
 
-.theme-light .text-stone-400 {
+/* Secondary sub-text */
+.theme-light .text-stone-400,
+.theme-light .text-stone-450 {
   color: #44403c !important; /* readable subtext */
 }
 
-.theme-light .text-stone-500,
-.theme-light .text-stone-605,
-.theme-light .text-stone-600,
-.theme-light .text-\[\#dacdc5\]\/60 {
-  color: #78716c !important; /* muted label details */
+/* Muted label subtexts */
+.theme-light .text-stone-500 {
+  color: #78716c !important;
 }
 
 .theme-light .text-stone-300\/90 {
   color: #292524 !important; /* reading lesson blocks text */
 }
 
-/* Accent Buttons mapping */
+/* Primary Solid Action Buttons mapping (e.g. Create, Sign Out, Back) */
 .theme-light .bg-stone-100 {
-  background-color: #1c1917 !important; /* solid charcoal dark button */
+  background-color: #1c1917 !important; /* Solid charcoal button */
   color: #ffffff !important;
 }
 .theme-light .bg-stone-100:hover,
 .theme-light .hover\:bg-stone-200:hover {
   background-color: #332f2c !important;
 }
-.theme-light .text-\[\#0c0a09\] {
-  color: #ffffff !important;
+.theme-light .text-[\#0c0a09],
+.theme-light .text-stone-950 {
+  color: #ffffff !important; /* Fixes text inside buttons to remain white */
 }
 
 /* Timeline Today Node mapping */
@@ -222,29 +292,6 @@
   --tw-ring-color: #e7e5e4 !important;
   background-color: #1c1917 !important;
   color: #ffffff !important;
-}
-
-/* Separator & border mappings */
-.theme-light div.border-stone-850,
-.theme-light div.border-stone-800,
-.theme-light div.border-stone-900,
-.theme-light span.border-stone-850,
-.theme-light span.border-stone-800,
-.theme-light h3.border-stone-850,
-.theme-light h3.border-stone-800,
-.theme-light header.border-stone-850,
-.theme-light button.border-stone-850,
-.theme-light button.border-stone-800 {
-  border-color: #e2e1dc !important;
-}
-
-.theme-light div.border-b-stone-850,
-.theme-light div.border-b {
-  border-bottom-color: #e2e1dc !important;
-}
-
-.theme-light .border-r-stone-800 {
-  border-right-color: #e2e1dc !important;
 }
 
 /* Universal header custom light mode */
@@ -256,6 +303,33 @@
 .theme-light header .bg-stone-100 {
   background-color: #1c1917 !important;
   color: #ffffff !important;
+}
+
+/* ==========================================================================
+   HEADER COMPONENT LIGHT MODE CONTRAST FIXES
+   ========================================================================== */
+
+.theme-light header .text-white {
+  color: #1c1917 !important; 
+}
+.theme-light header .group:hover .text-white {
+  color: #57534e !important; 
+}
+
+.theme-light header .border-r-stone-800\/80 {
+  border-right-color: #e2e1dc !important;
+}
+
+.theme-light header .bg-stone-800 {
+  background-color: #f4f3f0 !important; 
+  border: 1px solid #e2e1dc !important; 
+}
+.theme-light header .bg-stone-800 .text-stone-300 {
+  color: #1c1917 !important; 
+}
+.theme-light header .hover\:bg-red-950\/10:hover {
+  background-color: rgba(239, 68, 68, 0.08) !important; 
+  color: #dc2626 !important; 
 }
 
 /* Markdown typography in light mode */
@@ -274,27 +348,34 @@
   color: #0c0a09 !important;
 }
 
-/* Assessment options overrides to look fabulous */
-.theme-light .hover\:border-stone-500:hover {
-  border-color: #78716c !important;
-}
-.theme-light .hover\:text-stone-300:hover {
-  color: #1c1917 !important;
-}
-
 /* Correct/Incorrect Option Accents in light mode */
-.theme-light .bg-emerald-950\/20 {
+.theme-light .bg-emerald-950\/20,
+.theme-light .bg-emerald-950\/25,
+.theme-light .bg-emerald-955\/20 {
   background-color: #ecfdf5 !important;
   border-color: #a7f3d0 !important;
   color: #065f46 !important;
 }
+.theme-light .bg-emerald-950\/10 {
+  background-color: #f0fdf4 !important;
+}
+
+.theme-light .bg-emerald-950\/30 {
+  background-color: #ecfdf5 !important;
+}
+
+.theme-light .border-emerald-900\/35 {
+  border-color: #a7f3d0 !important;
+}
 .theme-light .text-emerald-400 {
   color: #059669 !important;
 }
-.theme-light .border-emerald-800\/50 {
+.theme-light .border-emerald-800\/50,
+.theme-light .border-emerald-850 {
   border-color: #34d399 !important;
 }
-.theme-light .bg-red-950\/20 {
+.theme-light .bg-red-950\/20,
+.theme-light .bg-red-950\/25 {
   background-color: #fef2f2 !important;
   border-color: #fecaca !important;
   color: #991b1b !important;
@@ -307,10 +388,10 @@
 }
 
 /* Progress bar rail custom style */
-.theme-light .bg-\[\#12100f\] .bg-gradient-to-r {
+.theme-light .bg-stone-950 .bg-gradient-to-r {
   opacity: 1 !important;
 }
-.theme-light .bg-\[\#12100f\] div.h-full {
+.theme-light .bg-stone-950 div.h-full {
   background-color: #10b981 !important; /* green pace bar */
 }
 
@@ -362,6 +443,3 @@
   color: #991b1b !important;
   border-color: #fca5a5 !important;
 }
-
-
-
